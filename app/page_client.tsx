@@ -46,8 +46,31 @@ export default function ClientApp({ initialAuthenticated }: { initialAuthenticat
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       })
-      const out = await res.json().catch(() => ({}))
-      if (!res.ok) throw new Error(out.error || "Auth failed")
+      const out = await res.json().catch(() => ({}) as any)
+
+      if (!res.ok) {
+        if (isLogin && res.status === 404 && out?.code === "NO_ACCOUNT") {
+          setIsLogin(false)
+          // Keep the email so the user can register quickly
+          // Show a clear message prompting account creation
+          toast({
+            title: "No account found",
+            description: "Create an account to continue.",
+            variant: "destructive",
+          })
+          return
+        }
+        if (isLogin && res.status === 401 && out?.code === "WRONG_PASSWORD") {
+          toast({
+            title: "Incorrect password",
+            description: "Please try again.",
+            variant: "destructive",
+          })
+          return
+        }
+        throw new Error(out?.error || "Auth failed")
+      }
+
       await mutate()
       setEmail("")
       setPassword("")
