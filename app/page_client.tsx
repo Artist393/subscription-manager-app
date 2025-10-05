@@ -54,8 +54,8 @@ export default function ClientApp({ initialAuthenticated }: { initialAuthenticat
           // Keep the email so the user can register quickly
           // Show a clear message prompting account creation
           toast({
-            title: "No account found",
-            description: "Create an account to continue.",
+            title: "No account exists",
+            description: "We couldn't find an account for this email. Please create one to continue.",
             variant: "destructive",
           })
           return
