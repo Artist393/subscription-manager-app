@@ -1,0 +1,153 @@
+openapi: 3.0.3
+info:
+  title: Subscription Manager API
+  version: 1.0.0
+  description: CRUD and listing endpoints for subscriptions with pagination, filtering, sorting, and search.
+servers:
+  - url: http://localhost:3000
+paths:
+  /api/auth/register:
+    post:
+      summary: Register a new user and create a session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string, format: email }
+                password: { type: string, format: password }
+      responses:
+        '201':
+          description: Created
+        '400':
+          description: Bad Request
+  /api/auth/login:
+    post:
+      summary: Log in and create a session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string, format: email }
+                password: { type: string, format: password }
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Unauthorized
+  /api/auth/me:
+    get:
+      summary: Session info
+      responses:
+        '200':
+          description: OK
+  /api/auth/logout:
+    post:
+      summary: Log out (clear session cookie)
+      responses:
+        '200':
+          description: OK
+  /api/subscriptions:
+    get:
+      summary: List subscriptions
+      parameters:
+        - in: query
+          name: page
+          schema: { type: integer, default: 1, minimum: 1 }
+        - in: query
+          name: limit
+          schema: { type: integer, default: 5, minimum: 1, maximum: 50 }
+        - in: query
+          name: cycle
+          schema:
+            type: string
+            enum: [Monthly, Quarterly, Annually]
+        - in: query
+          name: sort_by
+          schema: { type: string, enum: [cost] }
+        - in: query
+          name: order
+          schema: { type: string, enum: [asc, desc], default: asc }
+        - in: query
+          name: search
+          schema: { type: string }
+      responses:
+        '200':
+          description: OK
+    post:
+      summary: Create a subscription
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, billing_cycle, is_active]
+              properties:
+                name: { type: string }
+                billing_cycle: { type: string, enum: [Monthly, Quarterly, Annually] }
+                is_active: { type: boolean }
+                base_cost: { type: number }
+                tax_rate: { type: number }
+      responses:
+        '201':
+          description: Created
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+  /api/subscriptions/{id}:
+    get:
+      summary: Read one subscription
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: OK }
+        '404': { description: Not Found }
+        '401': { description: Unauthorized }
+    put:
+      summary: Update a subscription
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, billing_cycle, is_active]
+              properties:
+                name: { type: string }
+                billing_cycle: { type: string, enum: [Monthly, Quarterly, Annually] }
+                is_active: { type: boolean }
+                base_cost: { type: number }
+                tax_rate: { type: number }
+      responses:
+        '200': { description: OK }
+        '400': { description: Bad Request }
+        '401': { description: Unauthorized }
+        '404': { description: Not Found }
+    delete:
+      summary: Delete a subscription
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: OK }
+        '404': { description: Not Found }
+        '401': { description: Unauthorized }
